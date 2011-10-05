@@ -1054,11 +1054,12 @@ function addCommentFlags(table, lines, key) {
  * @param {string} interdiff_revision  The interdiff revision of the file.
  * @param {int}    chunk_index         The chunk index number.
  * @param {string} tbody_id            The tbody ID to insert into.
+ * @param {bool}   highlighting        Whether syntax highlighting is on.
  */
 function expandChunk(review_base_url, fileid, filediff_id, revision,
-                     interdiff_revision, chunk_index, link) {
+                     interdiff_revision, chunk_index, highlighting, link) {
     gDiff.getDiffFragment(review_base_url, fileid, filediff_id, revision,
-                          interdiff_revision, chunk_index, function(html) {
+                          interdiff_revision, chunk_index, highlighting, function(html) {
         var tbody = $(link).parents("tbody.diff-header");
         var table = tbody.parent();
         var key = "file" + filediff_id;
@@ -1169,10 +1170,14 @@ function updateAnchors(table) {
  *                                           (optional)
  * @param {string} file_index                The file index
  * @param {dict}   comment_counts            The comments for this region
+ * @param {bool}   collapse_diffs            Whether to collapse diffs
+ * @param {bool}   highlight                 Whether to syntax highlight the diff
  */
 function loadFileDiff(review_base_url, filediff_id, filediff_revision,
                       interfilediff_id, interfilediff_revision, file_index,
-                      comment_counts) {
+                      comment_counts,
+                      collapse_diffs, highlighting) {
+
     if ($("#file" + filediff_id).length == 1) {
         /* We already have this one. This is probably a pre-loaded file. */
         setupFileDiff();
@@ -1180,7 +1185,8 @@ function loadFileDiff(review_base_url, filediff_id, filediff_revision,
         $.funcQueue("diff_files").add(function() {
             gDiff.getDiffFile(review_base_url, filediff_id, filediff_revision,
                               interfilediff_id, interfilediff_revision,
-                              file_index, onFileLoaded);
+                              file_index, onFileLoaded,
+                              collapse_diffs, highlighting);
         });
     }
 

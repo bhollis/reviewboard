@@ -43,6 +43,7 @@
   });
 </script>
 {% endif %}
+
 {% endblock %}
 
 {% block content %}
@@ -95,9 +96,9 @@
  <p>
 {%     blocktrans with diffset.revision as revision and review_request.get_absolute_url as review_request_url%}
   This is not the most recent revision of the diff. The
-  <a href="{{review_request_url}}diff/">latest diff</a> is revision
+  <a href="{{review_request_url}}diff/?{{expandarg}}">latest diff</a> is revision
   {{latest_revision}}.
-  <a href="{{review_request_url}}diff/{{revision}}-{{latest_revision}}/">See what's changed.</a>
+  <a href="{{review_request_url}}diff/{{revision}}-{{latest_revision}}/?{{expandarg}}">See what's changed.</a>
 {%     endblocktrans %}
 {%    endif %}
  </p>
@@ -116,14 +117,14 @@
 {%     if diffset_info.is_current %}
   <li><b>Revision {{diffset_info.diffset.revision}}</b></li>
 {%     else %}
-  <li><a href="{{review_request.get_absolute_url}}diff/{{diffset_info.diffset.revision}}/#index_header">Revision {{diffset_info.diffset.revision}}</a></li>
+  <li><a href="{{review_request.get_absolute_url}}diff/{{diffset_info.diffset.revision}}/?{{expandarg}}#index_header">Revision {{diffset_info.diffset.revision}}</a></li>
 {%     endif %}
 {%    endfor %}
 {%    for pair in review|interdiffs_with_comments:diffset_pair %}
 {%     if pair.is_current %}
   <li><b>Interdiff revision {{pair.diffset.revision}} - {{pair.interdiff.revision}}</b></li>
 {%     else %}
-  <li><a href="{{review_request.get_absolute_url}}diff/{{pair.diffset.revision}}-{{pair.interdiff.revision}}/">Interdiff revision {{pair.diffset.revision}} - {{pair.interdiff.revision}}</a></li>
+  <li><a href="{{review_request.get_absolute_url}}diff/{{pair.diffset.revision}}-{{pair.interdiff.revision}}/?{{expandarg}}">Interdiff revision {{pair.diffset.revision}} - {{pair.interdiff.revision}}</a></li>
 {%     endif %}
 {%    endfor %}
  </ul>
@@ -141,7 +142,7 @@
 {%   if item.is_current %}
      <span class="current">{{item.revision}}</span>
 {%   else %}
-     <a href="{{review_request.get_absolute_url}}diff/{{item.revision}}/#index_header">{{item.revision}}</a>
+     <a href="{{review_request.get_absolute_url}}diff/{{item.revision}}/?{{expandarg}}#index_header">{{item.revision}}</a>
 {%   endif %}
 {%  endfor %}
 {%  if draft and draft.diffset %}
@@ -149,7 +150,7 @@
 {%   if is_draft_diff %}
      <span class="current">{{draft.diffset.revision}}</span>
 {%   else %}
-     <a href="{{review_request.get_absolute_url}}diff/{{draft.diffset.revision}}/#index_header">{{draft.diffset.revision}}</a>
+     <a href="{{review_request.get_absolute_url}}diff/{{draft.diffset.revision}}/?{{expandarg}}#index_header">{{draft.diffset.revision}}</a>
 {%   endif %}
 {%  endif %}
     </div>
@@ -163,7 +164,7 @@
 {%   if item.is_current %}
      <span class="current">{{item.revision}}</span>
 {%   else %}
-     <a href="{{review_request.get_absolute_url}}diff/{{item.path}}/#index_header">{{item.revision}}</a>
+     <a href="{{review_request.get_absolute_url}}diff/{{item.path}}/?{{expandarg}}#index_header">{{item.revision}}</a>
 {%   endif %}
 {%  endfor %}
 {%  if draft and draft.diffset %}
@@ -171,7 +172,7 @@
 {%   if is_draft_diff or is_draft_interdiff %}
      <span class="current">{{draft.diffset.revision}}</span>
 {%   else %}
-     <a href="{{review_request.get_absolute_url}}diff/{{diffset_pair.0}}-{{diffset_pair.1}}/#index_header">{{draft.diffset.revision}}</a>
+     <a href="{{review_request.get_absolute_url}}diff/{{diffset_pair.0}}-{{diffset_pair.1}}/?{{expandarg}}#index_header">{{draft.diffset.revision}}</a>
 {%   endif %}
 {%  endif %}
     </div>
@@ -188,9 +189,9 @@
 
 <ul class="controls">
 {% if collapseall %}
- <li><a href=".?expand=1"><img src="{{MEDIA_URL}}rb/images/expand.png?{{MEDIA_SERIAL}}" width="14" height="14" border="0" alt="" /> {% trans "Expand changes" %}</a></li>
+ <li><a href=".?page={{page}}&expand=1"><img src="{{MEDIA_URL}}rb/images/expand.png?{{MEDIA_SERIAL}}" width="14" height="14" border="0" alt="" /> {% trans "Expand changes" %}</a></li>
 {% else %}
- <li><a href=".?collapse=1"><img src="{{MEDIA_URL}}rb/images/collapse.png?{{MEDIA_SERIAL}}" width="14" height="14" border="0" alt="" /> {% trans "Collapse changes" %}</a></li>
+ <li><a href=".?page={{page}}"><img src="{{MEDIA_URL}}rb/images/collapse.png?{{MEDIA_SERIAL}}" width="14" height="14" border="0" alt="" /> {% trans "Collapse changes" %}</a></li>
 {% endif %}
 {% if siteconfig.settings.diffviewer_show_trailing_whitespace|default_if_none:1 %}
  <li class="ew" style="display:none;"><a href="#" class="toggleExtraWhitespaceButton"><img src="{{MEDIA_URL}}rb/images/collapse.png?{{MEDIA_SERIAL}}" width="14" height="14" border="0" alt="" /> {% trans "Hide Extra Whitespace" %}</a></li>
@@ -233,7 +234,9 @@
                null, null,
 {% endif %}
                "{{file.index}}",
-			   {% commentcounts file.filediff file.interfilediff %});
+			   {% commentcounts file.filediff file.interfilediff %},
+			   {% if collapseall %}true{% else %}false{% endif %},
+			   {% if highlighting %}true{% else %}false{% endif %});
 });
 </script>
 {% endfor %}

@@ -59,15 +59,7 @@ def build_diff_fragment(request, file, chunkindex, highlighting, collapseall,
 
 
 def get_collapse_diff(request):
-    if request.GET.get('expand', False):
-        return False
-    elif request.GET.get('collapse', False):
-        return True
-    elif request.COOKIES.has_key('collapsediffs'):
-        return (request.COOKIES['collapsediffs'] == "True")
-    else:
-        return True
-
+    return int(request.GET.get('expand', 0)) == 0
 
 def view_diff(request, diffset, interdiffset=None, extra_context={},
               template_name='diffviewer/view_diff.html'):
@@ -108,12 +100,21 @@ def view_diff(request, diffset, interdiffset=None, extra_context={},
 
         collapse_diffs = get_collapse_diff(request)
 
+        # Set an argument to be appended to diff URLs to show them
+        # expanded so that once expanded, browsing around reviews
+        # keeps diffs expanded in that review.
+        expandarg = ''
+        if not collapse_diffs:
+            expandarg = 'expand=1'
+
         context = {
             'diffset': diffset,
             'interdiffset': interdiffset,
             'diffset_pair': (diffset, interdiffset),
             'files': page.object_list,
             'collapseall': collapse_diffs,
+            'expandarg': expandarg,
+            'highlighting': highlighting,
 
             # Add the pagination context
             'is_paginated': page.has_other_pages(),
@@ -160,7 +161,6 @@ def view_diff(request, diffset, interdiffset=None, extra_context={},
 
         response = render_to_response(template_name,
                                       RequestContext(request, context))
-        response.set_cookie('collapsediffs', collapse_diffs)
 
         if interdiffset:
             logging.debug("Done generating diff viewer page for interdiffset "
@@ -203,10 +203,9 @@ def view_diff_fragment(
 
         return None
 
-    diffset = get_object_or_404(DiffSet, pk=diffset_id)
-    filediff = get_object_or_404(FileDiff, pk=filediff_id, diffset=diffset)
-    interdiffset = get_object_or_none(DiffSet, pk=interdiffset_id)
-    highlighting = get_enable_highlighting(request.user)
+    filediff = get_object_or_404(FileDiff, pk=filediff_id, diffset=diffset_id)
+    # Grab the highlighting setting from a param so diff fragments can have unique cacheable URLs
+    highlighting = (request.GET.get('highlighting','0') == '1')
 
     if chunkindex:
         collapseall = False
@@ -220,6 +219,7 @@ def view_diff_fragment(
             context = {
                 'standalone': chunkindex is not None,
                 'base_url': base_url,
+                'highlighting': highlighting,
             }
 
             return HttpResponse(build_diff_fragment(request, file,

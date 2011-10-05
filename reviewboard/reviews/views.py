@@ -880,15 +880,14 @@ def diff_fragment(request,
     if interdiff_revision is not None:
         interdiffset = _query_for_diff(review_request, request.user,
                                        interdiff_revision)
-        interdiffset_id = interdiffset.id
     else:
-        interdiffset_id = None
+        interdiffset = None
 
     diffset = _query_for_diff(review_request, request.user, revision)
 
     return view_diff_fragment(request, diffset.id, filediff_id,
                               review_request.get_absolute_url(),
-                              interdiffset_id, chunkindex, template_name)
+                              interdiffset, chunkindex, template_name)
 
 
 @check_login_required
