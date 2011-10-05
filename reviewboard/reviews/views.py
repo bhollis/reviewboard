@@ -17,7 +17,7 @@ from django.utils import simplejson
 from django.utils.http import http_date
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
-from django.views.decorators.cache import cache_control
+from django.views.decorators.cache import cache_control, cache_page
 from django.views.generic.list_detail import object_list
 
 from djblets.auth.util import login_required
@@ -853,6 +853,7 @@ def comment_diff_fragments(
 
 
 @check_login_required
+@cache_page(60 * 60 * 24 * 7) # one week
 def diff_fragment(request,
                   review_request_id,
                   revision,
