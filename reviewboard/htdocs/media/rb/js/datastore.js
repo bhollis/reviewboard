@@ -348,7 +348,8 @@ $.extend(RB.Diff.prototype, {
     getDiffFile: function(review_base_url, filediff_id, filediff_revision,
                           interfilediff_id, interfilediff_revision,
                           file_index, onSuccess,
-                          collapse_diffs, highlighting) {
+                          collapse_diffs, highlighting,
+                          draft_diff_time) {
         var revision_str = filediff_revision;
 
         if (interfilediff_id) {
@@ -357,10 +358,13 @@ $.extend(RB.Diff.prototype, {
 
         $.ajax({
             type: "GET",
-            url: review_base_url + "diff/" + revision_str + "/fragment/" +
-                 filediff_id + "/?index=" + file_index + "&expand=" +
-                 (collapse_diffs ? 0 : 1) + "&" + AJAX_SERIAL +
-                 "&highlighting=" + (highlighting ? 1 : 0),
+            url: review_base_url + "diff/" + revision_str +
+                "/fragment/" + filediff_id +
+                "/?index=" + file_index +
+                "&expand=" + (collapse_diffs ? 0 : 1) +
+                "&highlighting=" + (highlighting ? 1 : 0) +
+                "&draft_time=" + draft_diff_time +
+                "&" + AJAX_SERIAL,
             complete: onSuccess
         });
     },

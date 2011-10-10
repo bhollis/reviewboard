@@ -750,6 +750,26 @@ def diff(request,
 
     last_activity_time, updated_object = review_request.get_last_activity()
 
+    # Passes the timestamp for the latest diff through to bust the page cache.
+    # Without this a very peculiar use case fails...
+    # 1. publish a review with multiple files
+    # 2. upload a revision to several files but don't publish
+    # 3. view the diff between versions 1 and 2
+    # 4. upload a second revision for those files, still without publishing
+    # 5. view the diff between versions 1 and 2 again
+    #
+    # For any fragments loaded by ajax (ie, all the diffs but the first) you
+    # will still see the same diff as step #3. This is because the diff uses
+    # the lower diff id for the url (the one for version 1) which causes the
+    # page cache to hold onto the old content.
+
+    draft_diff_time = 0
+    if has_draft_diff:
+      try:
+        draft_timestamp = draft.diffset.timestamp
+        draft_diff_time = time.mktime(draft_timestamp.timetuple())
+      except DiffSet.DoesNotExist: pass
+
     return view_diff(
          request, diffset, interdiffset, template_name=template_name,
          extra_context=_make_review_request_context(review_request, {
@@ -760,6 +780,7 @@ def diff(request,
             'is_draft_interdiff': is_draft_interdiff,
             'num_diffs': num_diffs,
             'last_activity_time': last_activity_time,
+            'draft_diff_time': draft_diff_time,
             'specific_diff_requested': revision is not None or
                                        interdiff_revision is not None,
             'base_url': review_request.get_absolute_url(),

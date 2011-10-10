@@ -236,7 +236,8 @@
                "{{file.index}}",
 			   {% commentcounts file.filediff file.interfilediff %},
 			   {% if collapseall %}true{% else %}false{% endif %},
-			   {% if highlighting %}true{% else %}false{% endif %});
+			   {% if highlighting %}true{% else %}false{% endif %},
+			   {{draft_diff_time}});
 });
 </script>
 {% endfor %}

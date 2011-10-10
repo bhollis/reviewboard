@@ -1172,11 +1172,13 @@ function updateAnchors(table) {
  * @param {dict}   comment_counts            The comments for this region
  * @param {bool}   collapse_diffs            Whether to collapse diffs
  * @param {bool}   highlight                 Whether to syntax highlight the diff
+ * @param {int}    draft_diff_time           Timestamp for when draft was uploaded
  */
 function loadFileDiff(review_base_url, filediff_id, filediff_revision,
                       interfilediff_id, interfilediff_revision, file_index,
                       comment_counts,
-                      collapse_diffs, highlighting) {
+                      collapse_diffs, highlighting,
+                      draft_diff_time) {
 
     if ($("#file" + filediff_id).length == 1) {
         /* We already have this one. This is probably a pre-loaded file. */
@@ -1186,7 +1188,8 @@ function loadFileDiff(review_base_url, filediff_id, filediff_revision,
             gDiff.getDiffFile(review_base_url, filediff_id, filediff_revision,
                               interfilediff_id, interfilediff_revision,
                               file_index, onFileLoaded,
-                              collapse_diffs, highlighting);
+                              collapse_diffs, highlighting,
+                              draft_diff_time);
         });
     }
 
